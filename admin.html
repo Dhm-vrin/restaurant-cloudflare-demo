@@ -11,41 +11,58 @@
 </head>
 <body class="admin-page">
     <main class="section admin-shell">
-        <div class="admin-header">
-            <div>
-                <p class="eyebrow" style="color: var(--olive);">Admin</p>
-                <h1 class="admin-title">Διαχείριση κρατήσεων</h1>
-                <p class="admin-copy">Δες όλες τις κρατήσεις, φίλτραρε ανά ημερομηνία ή status και άλλαξε μια κράτηση σε confirmed ή cancelled.</p>
-            </div>
-            <div class="admin-actions">
-                <a class="button secondary admin-back-link" href="index.html">Επιστροφή στο site</a>
-            </div>
-        </div>
-
-        <section class="admin-toolbar story-card">
-            <div class="form-row admin-filters">
+        <section class="reservation-panel admin-login-panel" id="admin-login-panel">
+            <p class="eyebrow" style="color: var(--olive);">Admin Access</p>
+            <h1 class="admin-title">Είσοδος στο admin panel</h1>
+            <p class="admin-copy">Βάλε τον κωδικό για να δεις και να διαχειριστείς τις κρατήσεις.</p>
+            <form id="admin-login-form" class="admin-login-form">
                 <label>
-                    Ημερομηνία
-                    <input type="date" id="admin-date-filter">
+                    Κωδικός
+                    <input type="password" id="admin-password" placeholder="Εισαγωγή κωδικού" required>
                 </label>
-                <label>
-                    Status
-                    <select id="admin-status-filter">
-                        <option value="">Όλα</option>
-                        <option value="pending">pending</option>
-                        <option value="confirmed">confirmed</option>
-                        <option value="cancelled">cancelled</option>
-                    </select>
-                </label>
-            </div>
-            <div class="admin-toolbar-actions">
-                <button class="button primary" id="admin-refresh" type="button">Ανανέωση</button>
-                <p class="form-feedback" id="admin-feedback" role="status" aria-live="polite"></p>
-            </div>
+                <button class="button primary" type="submit">Είσοδος</button>
+                <p class="form-feedback" id="admin-login-feedback" role="status" aria-live="polite"></p>
+            </form>
         </section>
 
-        <section class="admin-summary-grid" id="admin-summary"></section>
-        <section class="admin-list" id="admin-list"></section>
+        <section id="admin-app" hidden>
+            <div class="admin-header">
+                <div>
+                    <p class="eyebrow" style="color: var(--olive);">Admin</p>
+                    <h1 class="admin-title">Διαχείριση κρατήσεων</h1>
+                    <p class="admin-copy">Δες όλες τις κρατήσεις, φίλτραρε ανά ημερομηνία ή status και άλλαξε μια κράτηση σε confirmed ή cancelled.</p>
+                </div>
+                <div class="admin-actions" style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <button class="button secondary admin-back-link" id="admin-logout" type="button">Αποσύνδεση</button>
+                    <a class="button secondary admin-back-link" href="index.html">Επιστροφή στο site</a>
+                </div>
+            </div>
+
+            <section class="admin-toolbar story-card">
+                <div class="form-row admin-filters">
+                    <label>
+                        Ημερομηνία
+                        <input type="date" id="admin-date-filter">
+                    </label>
+                    <label>
+                        Status
+                        <select id="admin-status-filter">
+                            <option value="">Όλα</option>
+                            <option value="pending">pending</option>
+                            <option value="confirmed">confirmed</option>
+                            <option value="cancelled">cancelled</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="admin-toolbar-actions">
+                    <button class="button primary" id="admin-refresh" type="button">Ανανέωση</button>
+                    <p class="form-feedback" id="admin-feedback" role="status" aria-live="polite"></p>
+                </div>
+            </section>
+
+            <section class="admin-summary-grid" id="admin-summary"></section>
+            <section class="admin-list" id="admin-list"></section>
+        </section>
     </main>
 
     <script src="admin.js"></script>

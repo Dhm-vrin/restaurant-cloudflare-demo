@@ -1,4 +1,13 @@
-﻿const summaryContainer = document.querySelector("#admin-summary");
+﻿const ADMIN_PASSWORD = "casa2026";
+const ADMIN_SESSION_KEY = "casa-di-vento-admin";
+
+const loginPanel = document.querySelector("#admin-login-panel");
+const loginForm = document.querySelector("#admin-login-form");
+const loginFeedback = document.querySelector("#admin-login-feedback");
+const passwordInput = document.querySelector("#admin-password");
+const adminApp = document.querySelector("#admin-app");
+const logoutButton = document.querySelector("#admin-logout");
+const summaryContainer = document.querySelector("#admin-summary");
 const listContainer = document.querySelector("#admin-list");
 const dateFilter = document.querySelector("#admin-date-filter");
 const statusFilter = document.querySelector("#admin-status-filter");
@@ -15,6 +24,19 @@ const setFeedback = (message, type = "") => {
 
     if (type) {
         feedback.classList.add(type);
+    }
+};
+
+const setLoginFeedback = (message, type = "") => {
+    if (!loginFeedback) {
+        return;
+    }
+
+    loginFeedback.textContent = message;
+    loginFeedback.className = "form-feedback";
+
+    if (type) {
+        loginFeedback.classList.add(type);
     }
 };
 
@@ -205,9 +227,37 @@ const updateReservationStatus = async (id, status, button) => {
     }
 };
 
+const showAdminApp = () => {
+    loginPanel.hidden = true;
+    adminApp.hidden = false;
+    loadReservations();
+};
+
+const logout = () => {
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    adminApp.hidden = true;
+    loginPanel.hidden = false;
+    passwordInput.value = "";
+    setLoginFeedback("Έγινε αποσύνδεση.", "is-success");
+};
+
 refreshButton?.addEventListener("click", loadReservations);
 dateFilter?.addEventListener("change", loadReservations);
 statusFilter?.addEventListener("change", loadReservations);
+logoutButton?.addEventListener("click", logout);
+
+loginForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    if ((passwordInput?.value || "").trim() !== ADMIN_PASSWORD) {
+        setLoginFeedback("Λάθος κωδικός. Δοκίμασε ξανά.", "is-error");
+        return;
+    }
+
+    sessionStorage.setItem(ADMIN_SESSION_KEY, "ok");
+    setLoginFeedback("");
+    showAdminApp();
+});
 
 listContainer?.addEventListener("click", async (event) => {
     const button = event.target.closest(".admin-action-tile");
@@ -226,4 +276,6 @@ listContainer?.addEventListener("click", async (event) => {
     await updateReservationStatus(id, status, button);
 });
 
-loadReservations();
+if (sessionStorage.getItem(ADMIN_SESSION_KEY) === "ok") {
+    showAdminApp();
+}

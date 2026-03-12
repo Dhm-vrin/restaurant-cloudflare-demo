@@ -820,3 +820,15 @@ textarea:focus {
         grid-template-columns: 1fr;
     }
 }
+
+.admin-login-panel {
+    max-width: 520px;
+    margin: 0 auto;
+    display: grid;
+    gap: 18px;
+}
+
+.admin-login-form {
+    display: grid;
+    gap: 16px;
+}
