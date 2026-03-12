@@ -165,6 +165,10 @@ if (reservationForm) {
         updateSummary();
     });
 
+    if (reservationDate.value) {
+        loadAvailability(reservationDate.value);
+    }
+
     reservationForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
@@ -189,6 +193,7 @@ if (reservationForm) {
 
         const formData = new FormData(reservationForm);
         const payload = Object.fromEntries(formData.entries());
+        let shouldRedirect = false;
 
         try {
             const response = await fetch("/api/reservations", {
@@ -208,21 +213,30 @@ if (reservationForm) {
             }
 
             if (!response.ok) {
-                console.warn("Reservation save did not return success", result);
+                throw new Error(result.error || "Αποτυχία αποθήκευσης κράτησης.");
             }
+
+            await loadAvailability(payload.date);
+            shouldRedirect = true;
         } catch (error) {
             console.warn("Reservation request failed", error);
+            setFeedback(error.message || "Αποτυχία αποθήκευσης κράτησης.", "is-error");
+            return;
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = "Αποθήκευση κράτησης";
+            }
+        }
+
+        if (!shouldRedirect) {
+            return;
         }
 
         reservationForm.reset();
-        resetTimeOptions();
+        await loadAvailability(payload.date);
         updateSummary();
         setFeedback("Η φόρμα ολοκληρώθηκε. Μεταφορά στη σελίδα επιβεβαίωσης...", "is-success");
         goToThanks();
-
-        if (submitButton) {
-            submitButton.disabled = false;
-            submitButton.textContent = "Αποθήκευση κράτησης";
-        }
     });
 }

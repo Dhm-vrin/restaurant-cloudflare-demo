@@ -275,7 +275,7 @@
                     <h2>Κάνε κράτηση online σε διαθέσιμες ώρες ανά μισή ώρα.</h2>
                 </div>
                 <p class="section-copy">
-                    Η φόρμα λειτουργεί τοπικά για demo χρήση, με επιλογή ώρας ανά 30 λεπτά και απλή επιβεβαίωση κράτησης χωρίς σύνδεση με backend ή βάση δεδομένων.
+                    Κάθε νέα κράτηση αποθηκεύεται στη βάση, στέλνει ειδοποίηση email και η συγκεκριμένη ώρα γίνεται unavailable για τη συγκεκριμένη ημερομηνία.
                 </p>
             </div>
             <div class="reservation-layout">
@@ -370,9 +370,9 @@
                 <aside class="reservation-panel">
                     <h3>Τι περιλαμβάνει η κράτηση</h3>
                     <ul>
-                        <li>Τοπική demo φόρμα χωρίς backend ή database</li>
-                        <li>Επιλογή ώρας μόνο ανά 30 λεπτά</li>
-                        <li>Περισσότερα menu items και πλουσιότερη gallery</li>
+                        <li>Αποθήκευση κράτησης στη Neon database</li>
+                        <li>Αυτόματο email notification για κάθε νέα κράτηση</li>
+                        <li>Unavailable slots μόλις κλείσει συγκεκριμένη ώρα</li>
                         <li>Responsive διάταξη για κινητό και desktop</li>
                     </ul>
                     <div class="reservation-summary" id="reservation-summary">
@@ -391,6 +391,3 @@
     <script src="index.js"></script>
 </body>
 </html>
-
-
-
