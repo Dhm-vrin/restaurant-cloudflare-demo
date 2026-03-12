@@ -16,14 +16,20 @@
 <body>
     <header class="hero" id="top">
         <nav class="topbar">
+            <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="Άνοιγμα μενού">
+                <span class="menu-dots" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+                <span class="menu-toggle-label">Μενού</span>
+            </button>
             <a class="brand" href="#top">
                 <span class="brand-mark">Casa</span>
                 <span class="brand-name">di Vento</span>
             </a>
-            <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
-                Μενού
-            </button>
             <div class="nav-links" id="site-menu">
+                <a class="nav-link-cta" href="#reservation">Κλείσε τραπέζι</a>
                 <a href="#story">Η ιστορία μας</a>
                 <a href="#menu">Μενού</a>
                 <a href="#gallery">Φωτογραφίες</a>
@@ -31,6 +37,7 @@
                 <a href="#reservation">Κράτηση</a>
             </div>
         </nav>
+        <div class="nav-scrim" hidden></div>
 
         <div class="hero-content">
             <p class="eyebrow">Ristorante Italiano • Αθήνα</p>
@@ -388,4 +395,5 @@
     <script src="index.js"></script>
 </body>
 </html>
+
 

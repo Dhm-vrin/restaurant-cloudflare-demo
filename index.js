@@ -1,5 +1,6 @@
 ﻿const menuToggle = document.querySelector(".menu-toggle");
 const navLinks = document.querySelector(".nav-links");
+const navScrim = document.querySelector(".nav-scrim");
 const reservationDate = document.querySelector("#reservation-date");
 const reservationForm = document.querySelector("#reservation-form");
 const reservationSummary = document.querySelector("#reservation-summary");
@@ -7,16 +8,35 @@ const formFeedback = document.querySelector("#form-feedback");
 const timeSelect = reservationForm?.querySelector('select[name="time"]');
 
 if (menuToggle && navLinks) {
-    menuToggle.addEventListener("click", () => {
-        const isOpen = navLinks.classList.toggle("open");
+    const syncMenuState = (isOpen) => {
+        navLinks.classList.toggle("open", isOpen);
+        document.body.classList.toggle("nav-open", isOpen);
         menuToggle.setAttribute("aria-expanded", String(isOpen));
+
+        if (navScrim) {
+            navScrim.hidden = !isOpen;
+            navScrim.classList.toggle("visible", isOpen);
+        }
+    };
+
+    menuToggle.addEventListener("click", () => {
+        syncMenuState(!navLinks.classList.contains("open"));
+    });
+
+    navScrim?.addEventListener("click", () => {
+        syncMenuState(false);
     });
 
     navLinks.querySelectorAll("a").forEach((link) => {
         link.addEventListener("click", () => {
-            navLinks.classList.remove("open");
-            menuToggle.setAttribute("aria-expanded", "false");
+            syncMenuState(false);
         });
+    });
+
+    window.addEventListener("resize", () => {
+        if (window.innerWidth > 760) {
+            syncMenuState(false);
+        }
     });
 }
 
@@ -240,3 +260,4 @@ if (reservationForm) {
         goToThanks();
     });
 }
+
