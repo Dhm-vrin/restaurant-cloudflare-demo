@@ -81,6 +81,13 @@ const renderSummary = (summary = []) => {
     `).join("");
 };
 
+const renderActionButton = (label, status, tone) => `
+    <button class="admin-action-tile tone-${tone}" data-action="${status}" type="button">
+        <span class="admin-action-title">${label}</span>
+        <span class="admin-action-subtitle">Αλλαγή status σε ${status}</span>
+    </button>
+`;
+
 const renderReservations = (reservations = []) => {
     if (!listContainer) {
         return;
@@ -113,9 +120,9 @@ const renderReservations = (reservations = []) => {
             </div>
             <p class="admin-message"><strong>Σχόλια:</strong> ${reservation.message || "-"}</p>
             <div class="admin-card-actions">
-                <button class="button primary admin-action" data-action="confirmed" type="button">Confirm</button>
-                <button class="button secondary admin-action admin-secondary" data-action="pending" type="button">Pending</button>
-                <button class="button secondary admin-action admin-cancel" data-action="cancelled" type="button">Cancel</button>
+                ${renderActionButton("Confirm", "confirmed", "confirm")}
+                ${renderActionButton("Pending", "pending", "pending")}
+                ${renderActionButton("Cancel", "cancelled", "cancel")}
             </div>
         </article>
     `).join("");
@@ -152,9 +159,19 @@ const loadReservations = async () => {
 };
 
 const updateReservationStatus = async (id, status, button) => {
-    const originalLabel = button.textContent;
+    const title = button.querySelector(".admin-action-title");
+    const subtitle = button.querySelector(".admin-action-subtitle");
+    const originalTitle = title?.textContent || button.textContent;
+    const originalSubtitle = subtitle?.textContent || "";
     button.disabled = true;
-    button.textContent = "Αποθήκευση...";
+
+    if (title) {
+        title.textContent = "Αποθήκευση...";
+    }
+
+    if (subtitle) {
+        subtitle.textContent = "Περίμενε λίγο";
+    }
 
     try {
         const response = await fetch("/api/admin/reservation", {
@@ -177,7 +194,14 @@ const updateReservationStatus = async (id, status, button) => {
         setFeedback(error.message || "Αποτυχία ενημέρωσης κράτησης.", "is-error");
     } finally {
         button.disabled = false;
-        button.textContent = originalLabel;
+
+        if (title) {
+            title.textContent = originalTitle;
+        }
+
+        if (subtitle) {
+            subtitle.textContent = originalSubtitle;
+        }
     }
 };
 
@@ -186,7 +210,7 @@ dateFilter?.addEventListener("change", loadReservations);
 statusFilter?.addEventListener("change", loadReservations);
 
 listContainer?.addEventListener("click", async (event) => {
-    const button = event.target.closest(".admin-action");
+    const button = event.target.closest(".admin-action-tile");
     if (!button) {
         return;
     }

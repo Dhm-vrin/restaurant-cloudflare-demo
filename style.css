@@ -757,3 +757,66 @@ textarea:focus {
         display: grid;
     }
 }
+
+.admin-card-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.admin-action-tile {
+    border: 0;
+    border-radius: 18px;
+    padding: 16px;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.admin-action-tile:hover,
+.admin-action-tile:focus-visible {
+    transform: translateY(-2px);
+}
+
+.admin-action-tile:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.admin-action-title {
+    display: block;
+    font-weight: 800;
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+.admin-action-subtitle {
+    display: block;
+    font-size: 0.84rem;
+    line-height: 1.45;
+}
+
+.tone-confirm {
+    background: rgba(47, 90, 65, 0.14);
+    color: var(--olive);
+    border: 1px solid rgba(47, 90, 65, 0.16);
+}
+
+.tone-pending {
+    background: rgba(180, 67, 45, 0.12);
+    color: var(--accent-dark);
+    border: 1px solid rgba(180, 67, 45, 0.16);
+}
+
+.tone-cancel {
+    background: rgba(124, 36, 22, 0.14);
+    color: #7c2416;
+    border: 1px solid rgba(124, 36, 22, 0.16);
+}
+
+@media (max-width: 980px) {
+    .admin-card-actions {
+        grid-template-columns: 1fr;
+    }
+}
