@@ -7,8 +7,6 @@ const allowedTimes = new Set([
     "22:00", "22:30", "23:00", "23:30"
 ]);
 
-const activeStatuses = ["pending", "confirmed"];
-
 const json = (payload, status = 200) => new Response(JSON.stringify(payload), {
     status,
     headers: {
@@ -141,7 +139,7 @@ export async function onRequestPost(context) {
                 from reservations
                 where reservation_date = ${payload.date}
                   and reservation_time = ${payload.time}
-                  and status = any(${activeStatuses})
+                  and status in ('pending', 'confirmed')
             )
             insert into reservations (
                 name,

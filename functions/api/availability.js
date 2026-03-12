@@ -1,7 +1,5 @@
 ﻿import { neon } from "@neondatabase/serverless";
 
-const activeStatuses = ["pending", "confirmed"];
-
 const json = (payload, status = 200) => new Response(JSON.stringify(payload), {
     status,
     headers: {
@@ -34,7 +32,7 @@ export async function onRequestGet(context) {
             select reservation_time::text as time, count(*)::int as reserved_count
             from reservations
             where reservation_date = ${date}
-              and status = any(${activeStatuses})
+              and status in ('pending', 'confirmed')
             group by reservation_time
             order by reservation_time asc
         `;

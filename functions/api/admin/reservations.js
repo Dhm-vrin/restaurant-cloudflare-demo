@@ -1,7 +1,5 @@
 ﻿import { neon } from "@neondatabase/serverless";
 
-const allowedStatuses = ["pending", "confirmed", "cancelled"];
-
 const json = (payload, status = 200) => new Response(JSON.stringify(payload), {
     status,
     headers: {
@@ -47,6 +45,8 @@ export async function onRequestGet(context) {
                 status,
                 count(*)::int as total
             from reservations
+            where (${status || null}::text is null or status = ${status || null})
+              and (${date || null}::date is null or reservation_date = ${date || null})
             group by status
             order by status asc
         `;
@@ -54,7 +54,7 @@ export async function onRequestGet(context) {
         return json({
             reservations,
             summary,
-            allowedStatuses
+            allowedStatuses: ["pending", "confirmed", "cancelled"]
         });
     } catch (error) {
         console.error("admin list failed", error);

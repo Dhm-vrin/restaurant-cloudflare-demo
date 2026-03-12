@@ -228,15 +228,32 @@ const updateReservationStatus = async (id, status, button) => {
 };
 
 const showAdminApp = () => {
-    loginPanel.hidden = true;
-    adminApp.hidden = false;
+    if (loginPanel) {
+        loginPanel.hidden = true;
+        loginPanel.style.display = "none";
+    }
+
+    if (adminApp) {
+        adminApp.hidden = false;
+        adminApp.style.display = "block";
+    }
+
     loadReservations();
 };
 
 const logout = () => {
     sessionStorage.removeItem(ADMIN_SESSION_KEY);
-    adminApp.hidden = true;
-    loginPanel.hidden = false;
+
+    if (adminApp) {
+        adminApp.hidden = true;
+        adminApp.style.display = "none";
+    }
+
+    if (loginPanel) {
+        loginPanel.hidden = false;
+        loginPanel.style.display = "grid";
+    }
+
     passwordInput.value = "";
     setLoginFeedback("Έγινε αποσύνδεση.", "is-success");
 };
@@ -278,4 +295,14 @@ listContainer?.addEventListener("click", async (event) => {
 
 if (sessionStorage.getItem(ADMIN_SESSION_KEY) === "ok") {
     showAdminApp();
+} else {
+    if (adminApp) {
+        adminApp.hidden = true;
+        adminApp.style.display = "none";
+    }
+
+    if (loginPanel) {
+        loginPanel.hidden = false;
+        loginPanel.style.display = "grid";
+    }
 }
