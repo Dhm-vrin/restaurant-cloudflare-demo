@@ -15,5 +15,8 @@
 create index if not exists reservations_date_time_idx
   on reservations (reservation_date, reservation_time);
 
-create unique index if not exists reservations_slot_unique_idx
-  on reservations (reservation_date, reservation_time);
+create index if not exists reservations_status_idx
+  on reservations (status);
+
+create index if not exists reservations_slot_status_idx
+  on reservations (reservation_date, reservation_time, status);

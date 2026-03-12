@@ -7,6 +7,8 @@ const allowedTimes = new Set([
     "22:00", "22:30", "23:00", "23:30"
 ]);
 
+const activeStatuses = ["pending", "confirmed"];
+
 const json = (payload, status = 200) => new Response(JSON.stringify(payload), {
     status,
     headers: {
@@ -30,6 +32,18 @@ const parseGuests = (value) => {
     return Number.parseInt(value, 10);
 };
 
+const getSlotCapacity = (env) => {
+    const parsed = Number.parseInt(env.SLOT_CAPACITY ?? "1", 10);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : 1;
+};
+
+const escapeHtml = (value) => String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+
 const validatePayload = (payload) => {
     const requiredFields = ["name", "email", "phone", "date", "time", "guests"];
 
@@ -51,12 +65,12 @@ const validatePayload = (payload) => {
     return null;
 };
 
-const sendNotificationEmail = async (payload, env) => {
+const sendNotificationEmail = async (payload, reservation, env) => {
     if (!env.RESEND_API_KEY || !env.NOTIFY_EMAIL_TO || !env.NOTIFY_EMAIL_FROM) {
         return;
     }
 
-    await fetch("https://api.resend.com/emails", {
+    const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
             Authorization: `Bearer ${env.RESEND_API_KEY}`,
@@ -66,20 +80,34 @@ const sendNotificationEmail = async (payload, env) => {
             from: env.NOTIFY_EMAIL_FROM,
             to: [env.NOTIFY_EMAIL_TO],
             reply_to: payload.email,
-            subject: `Νέα κράτηση: ${payload.date} στις ${payload.time}`,
+            subject: `Νέα κράτηση | ${payload.date} στις ${payload.time}`,
             html: `
-                <h2>Νέα κράτηση</h2>
-                <p><strong>Όνομα:</strong> ${payload.name}</p>
-                <p><strong>Email:</strong> ${payload.email}</p>
-                <p><strong>Τηλέφωνο:</strong> ${payload.phone}</p>
-                <p><strong>Ημερομηνία:</strong> ${payload.date}</p>
-                <p><strong>Ώρα:</strong> ${payload.time}</p>
-                <p><strong>Άτομα:</strong> ${payload.guests}</p>
-                <p><strong>Χώρος:</strong> ${payload.seating || "Χωρίς προτίμηση"}</p>
-                <p><strong>Σχόλια:</strong> ${payload.message || "-"}</p>
+                <div style="font-family:Arial,sans-serif;background:#f7f0e4;padding:32px;color:#1e1a17;">
+                    <div style="max-width:640px;margin:0 auto;background:#fff8f0;border-radius:20px;padding:32px;border:1px solid #eadbc9;">
+                        <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#2f5a41;">Casa di Vento</p>
+                        <h1 style="margin:0 0 18px;font-size:30px;line-height:1.1;">Νέα online κράτηση</h1>
+                        <p style="margin:0 0 24px;font-size:16px;color:#5d5248;">Μόλις δημιουργήθηκε νέα κράτηση από το site.</p>
+                        <table style="width:100%;border-collapse:collapse;font-size:15px;">
+                            <tr><td style="padding:10px 0;border-bottom:1px solid #eadbc9;"><strong>Κωδικός</strong></td><td style="padding:10px 0;border-bottom:1px solid #eadbc9;">#${escapeHtml(reservation.id)}</td></tr>
+                            <tr><td style="padding:10px 0;border-bottom:1px solid #eadbc9;"><strong>Όνομα</strong></td><td style="padding:10px 0;border-bottom:1px solid #eadbc9;">${escapeHtml(payload.name)}</td></tr>
+                            <tr><td style="padding:10px 0;border-bottom:1px solid #eadbc9;"><strong>Email</strong></td><td style="padding:10px 0;border-bottom:1px solid #eadbc9;">${escapeHtml(payload.email)}</td></tr>
+                            <tr><td style="padding:10px 0;border-bottom:1px solid #eadbc9;"><strong>Τηλέφωνο</strong></td><td style="padding:10px 0;border-bottom:1px solid #eadbc9;">${escapeHtml(payload.phone)}</td></tr>
+                            <tr><td style="padding:10px 0;border-bottom:1px solid #eadbc9;"><strong>Ημερομηνία</strong></td><td style="padding:10px 0;border-bottom:1px solid #eadbc9;">${escapeHtml(payload.date)}</td></tr>
+                            <tr><td style="padding:10px 0;border-bottom:1px solid #eadbc9;"><strong>Ώρα</strong></td><td style="padding:10px 0;border-bottom:1px solid #eadbc9;">${escapeHtml(payload.time)}</td></tr>
+                            <tr><td style="padding:10px 0;border-bottom:1px solid #eadbc9;"><strong>Άτομα</strong></td><td style="padding:10px 0;border-bottom:1px solid #eadbc9;">${escapeHtml(payload.guests)}</td></tr>
+                            <tr><td style="padding:10px 0;border-bottom:1px solid #eadbc9;"><strong>Χώρος</strong></td><td style="padding:10px 0;border-bottom:1px solid #eadbc9;">${escapeHtml(payload.seating || "Χωρίς προτίμηση")}</td></tr>
+                            <tr><td style="padding:10px 0;"><strong>Σχόλια</strong></td><td style="padding:10px 0;">${escapeHtml(payload.message || "-")}</td></tr>
+                        </table>
+                    </div>
+                </div>
             `
         })
     });
+
+    if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Resend failed: ${response.status} ${body}`);
+    }
 };
 
 export async function onRequestPost(context) {
@@ -104,9 +132,17 @@ export async function onRequestPost(context) {
 
     const sql = neon(env.DATABASE_URL);
     const guests = parseGuests(payload.guests);
+    const capacity = getSlotCapacity(env);
 
     try {
         const inserted = await sql`
+            with slot_check as (
+                select count(*)::int as reserved_count
+                from reservations
+                where reservation_date = ${payload.date}
+                  and reservation_time = ${payload.time}
+                  and status = any(${activeStatuses})
+            )
             insert into reservations (
                 name,
                 email,
@@ -115,9 +151,10 @@ export async function onRequestPost(context) {
                 reservation_time,
                 guests,
                 seating,
-                message
+                message,
+                status
             )
-            values (
+            select
                 ${payload.name.trim()},
                 ${payload.email.trim()},
                 ${payload.phone.trim()},
@@ -125,9 +162,10 @@ export async function onRequestPost(context) {
                 ${payload.time},
                 ${guests},
                 ${payload.seating?.trim() || null},
-                ${payload.message?.trim() || null}
-            )
-            on conflict (reservation_date, reservation_time) do nothing
+                ${payload.message?.trim() || null},
+                'pending'
+            from slot_check
+            where reserved_count < ${capacity}
             returning id, status, created_at
         `;
 
@@ -135,11 +173,11 @@ export async function onRequestPost(context) {
             return json({ error: "Η συγκεκριμένη ημέρα και ώρα δεν είναι πλέον διαθέσιμη." }, 409);
         }
 
-        context.waitUntil(sendNotificationEmail(payload, env).catch((error) => {
+        context.waitUntil(sendNotificationEmail(payload, inserted[0], env).catch((error) => {
             console.error("notification email failed", error);
         }));
 
-        return json({ ok: true, reservation: inserted[0] }, 200);
+        return json({ ok: true, reservation: inserted[0], slotCapacity: capacity }, 200);
     } catch (error) {
         console.error("create-reservation failed", error);
         return json({ error: "Αποτυχία αποθήκευσης κράτησης στη βάση." }, 500);
