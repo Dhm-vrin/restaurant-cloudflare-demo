@@ -1233,3 +1233,61 @@ body.nav-open {
         padding: 42px 16px;
     }
 }
+
+@media (max-width: 760px) {
+    .gallery-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: 160px;
+        gap: 12px;
+    }
+
+    .gallery-card,
+    .gallery-hero,
+    .gallery-portrait,
+    .gallery-detail-one,
+    .gallery-detail-two,
+    .gallery-wide,
+    .gallery-sweet,
+    .gallery-people {
+        grid-column: auto;
+        grid-row: span 1;
+        min-height: 160px;
+    }
+
+    .gallery-hero,
+    .gallery-wide {
+        grid-column: span 2;
+    }
+
+    .gallery-card figcaption {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        font-size: 0.82rem;
+        line-height: 1.35;
+    }
+
+    .gallery-tag {
+        margin-bottom: 6px;
+        padding: 5px 8px;
+        font-size: 0.65rem;
+    }
+}
+
+@media (max-width: 460px) {
+    .gallery-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-auto-rows: 132px;
+    }
+
+    .gallery-card,
+    .gallery-hero,
+    .gallery-portrait,
+    .gallery-detail-one,
+    .gallery-detail-two,
+    .gallery-wide,
+    .gallery-sweet,
+    .gallery-people {
+        min-height: 132px;
+    }
+}
